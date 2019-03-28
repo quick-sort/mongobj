@@ -35,7 +35,7 @@ mongobj.update(person, {
 
 mongobj.update(person, {
     "$pull": {
-        "addresses.$[i].city.street": { "road": "Century Avenue" }
+        "addresses.$[i].street": { "road": "Century Avenue" }
     }
 }, {
     "arrayFilters": [{"i.country": "China"}]

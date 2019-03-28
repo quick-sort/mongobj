@@ -115,4 +115,4 @@ function update(obj, changes, options = {}) {
   }
   return obj;
 }
-export { update };
+module.exports = { update };
