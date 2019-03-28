@@ -1,0 +1,15 @@
+{
+  "name": "mongobj",
+  "version": "1.0.0",
+  "description": "Object operations in mongo api style",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Object",
+    "Mongo"
+  ],
+  "author": "quicksort",
+  "license": "MIT"
+}
