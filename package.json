@@ -1,14 +1,19 @@
 {
   "name": "mongobj",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "description": "Object operations in mongo api style",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+      "type" : "git",
+      "url" : "https://github.com/quick-sort/mongobj.git"
+  },
   "keywords": [
     "Object",
-    "Mongo"
+    "Mongo",
+    "object update"
   ],
   "author": "quicksort",
   "license": "MIT"

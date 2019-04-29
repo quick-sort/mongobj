@@ -1,26 +1,25 @@
-const NormalAttr = /^[a-zA-z_].*$/;
+const ArrayFilter = /^\$\[(.*)\]$/;
+const ArrayIndex = /^[0-9]*$/;
 
 function getAttr(obj, attrPath, arrayFilters, level = 0) {
   let tokens = attrPath.split('.');
   let parentObj = obj;
   while (tokens.length > level) {
     let attr = tokens.splice(0, 1)[0];
-    if (attr.match(NormalAttr)) {
+    let m = attr.match(ArrayFilter)
+    if (m) {
+      let filter = arrayFilters.find(f => Object.keys(f)[0].startsWith(m[1] + '.'));
+      let key = Object.keys(filter)[0];
+      let filterKey = key.substring(m[1].length + 1, key.length);
+      let filterValue = Object.values(filter)[0];
+      parentObj = parentObj.find(i => getAttr(i, filterKey) === filterValue);
+    } else if (attr.match(ArrayIndex)) {
+      parentObj = parentObj[parseInt(attr)];
+    } else {
       if (!(attr in parentObj)) {
         parentObj[attr] = {};
       }
       parentObj = parentObj[attr];
-    } else {
-      let m = attr.match(/^\$\[(.*)\]$/);
-      if (m) {
-        let filter = arrayFilters.find(f => Object.keys(f)[0].startsWith(m[1] + '.'));
-        let key = Object.keys(filter)[0];
-        let filterKey = key.substring(m[1].length + 1, key.length);
-        let filterValue = Object.values(filter)[0];
-        parentObj = parentObj.find(i => getAttr(i, filterKey) === filterValue);
-      } else {
-        parentObj = parentObj[parseInt(attr)];
-      }
     }
   }
   return parentObj;
@@ -31,16 +30,12 @@ function objectMatch(obj, filter) {
     if (key.indexOf('.') >= 0) {
       console.log('nested attr path is not ready now');
     }
-    if (key.match(NormalAttr)) {
-      if (typeof filter[key] !== 'object') {
-        return obj[key] === filter[key];
-      } else if (key === '$in') {
-        return filter[key].includes(obj);
-      } else {
-        console.log('filter value is object, not ready now');
-      }
+    if (typeof filter[key] !== 'object') {
+      return obj[key] === filter[key];
+    } else if (key === '$in') {
+      return filter[key].includes(obj);
     } else {
-      console.log('not ready ' + key);
+      console.log('filter value is object, not ready now');
     }
   }
   return false;
