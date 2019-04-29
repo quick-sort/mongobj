@@ -24,21 +24,19 @@ function getAttr(obj, attrPath, arrayFilters, level = 0) {
   }
   return parentObj;
 }
-
 function objectMatch(obj, filter) {
-  for (let key in filter) {
-    if (key.indexOf('.') >= 0) {
-      console.log('nested attr path is not ready now');
-    }
-    if (typeof filter[key] !== 'object') {
-      return obj[key] === filter[key];
-    } else if (key === '$in') {
-      return filter[key].includes(obj);
-    } else {
-      console.log('filter value is object, not ready now');
-    }
+  if (typeof(filter) !== 'object') {
+    return false
   }
-  return false;
+  return Object.entries(filter).every(([key, value]) => {
+    if (typeof(value) !== 'object') {
+      return obj[key] === value
+    } else if (key === '$in') {
+      return value.includes(obj)
+    } else {
+      return objectMatch(obj[key], value)
+    }
+  })
 }
 function update(obj, changes, options = {}) {
   /*
