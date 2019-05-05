@@ -13,7 +13,14 @@ describe('without arrayFilter', () => {
     mongobj.update(a, {'$set': {'l1.中文.newset': 2}})
     assert.equal(a['l1']['中文']['newset'], 2)
   })
-
+  it('set in undefined property', () => {
+    var a = {
+      'l1': {
+      }
+    }
+    mongobj.update(a, {'$set': {'l1.中文.newset': 2}})
+    assert.equal(a['l1']['中文']['newset'], 2)
+  })
   it('unset', () => {
     var a = {
       'l1': {
@@ -39,6 +46,14 @@ describe('without arrayFilter', () => {
     assert.equal(a['l1']['中文'].length, 2)
   })
 
+  it('push one element in undefined property', () => {
+    var a = {
+      'l1': {
+      }
+    }
+    mongobj.update(a, {'$push': {'l1.中文': {}}})
+    assert.equal(a['l1']['中文'].length, 1)
+  })
   it('push multi elements', () => {
     var a = {
       'l1': {

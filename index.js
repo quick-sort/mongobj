@@ -1,28 +1,36 @@
 const ArrayFilter = /^\$\[(.*)\]$/;
 const ArrayIndex = /^[0-9]*$/;
 
-function getAttr(obj, attrPath, arrayFilters, level = 0) {
-  let tokens = attrPath.split('.');
-  let parentObj = obj;
+function getProp({ obj, path, arrayFilters, level = 0, createOnNone = false }) {
+  let tokens = path.split('.');
+  let parent = obj;
   while (tokens.length > level) {
-    let attr = tokens.splice(0, 1)[0];
-    let m = attr.match(ArrayFilter)
+    let propName = tokens.splice(0, 1)[0];
+    let m = propName.match(ArrayFilter)
     if (m) {
       let filter = arrayFilters.find(f => Object.keys(f)[0].startsWith(m[1] + '.'));
+      if (!filter) {
+        return null
+      }
       let key = Object.keys(filter)[0];
       let filterKey = key.substring(m[1].length + 1, key.length);
       let filterValue = Object.values(filter)[0];
-      parentObj = parentObj.find(i => getAttr(i, filterKey) === filterValue);
-    } else if (attr.match(ArrayIndex)) {
-      parentObj = parentObj[parseInt(attr)];
+      parent = parent.find(i => getProp({ obj: i, path: filterKey }) === filterValue);
+    } else if (propName.match(ArrayIndex)) {
+      parent = parent[parseInt(propName)];
     } else {
-      if (!(attr in parentObj)) {
-        parentObj[attr] = {};
+      if (!(propName in parent)) {
+        if (createOnNone !== false) {
+          parent[propName] = createOnNone;
+          parent = parent[propName]
+        }
+      } else {
+        parent = parent[propName];
       }
-      parentObj = parentObj[attr];
     }
   }
-  return parentObj;
+  return parent;
+
 }
 function objectMatch(obj, filter) {
   if (typeof(filter) !== 'object') {
@@ -59,12 +67,21 @@ function update(obj, changes, options = {}) {
       let parent = null;
       switch (op) {
         case '$unset':
-          parent = getAttr(obj, key, options.arrayFilters, 1);
+          parent = getProp({
+            obj,
+            path: key,
+            arrayFilters: options.arrayFilters,
+            level: 1
+          })
           attr = tokens[tokens.length - 1];
           delete parent[attr];
           break;
         case '$pull':
-          parent = getAttr(obj, key, options.arrayFilters);
+          parent = getProp({
+            obj,
+            path: key,
+            arrayFilters: options.arrayFilters
+          })
           let idx = 0;
           if (typeof patches[key] === 'object') {
             while (idx >= 0) {
@@ -85,7 +102,12 @@ function update(obj, changes, options = {}) {
 
           break;
         case '$push':
-          parent = getAttr(obj, key, options.arrayFilters);
+          parent = getProp({
+            obj,
+            path: key,
+            arrayFilters: options.arrayFilters,
+            createOnNone: []
+          })
           if (patches[key]['$each']) {
             patches[key]['$each'].forEach(i => {
               if ('$position' in patches[key]) {
@@ -100,7 +122,13 @@ function update(obj, changes, options = {}) {
           break;
         default:
           //set
-          parent = getAttr(obj, key, options.arrayFilters, 1);
+          parent = getProp({
+            obj,
+            path: key,
+            arrayFilters: options.arrayFilters,
+            level: 1,
+            createOnNone: {}
+          })
           attr = tokens[tokens.length - 1];
           parent[attr] = patches[key];
       }
