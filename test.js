@@ -20,6 +20,7 @@ describe('without arrayFilter', () => {
     }
     mongobj.update(a, {'$set': {'l1.中文.newset': 2}})
     assert.equal(a['l1']['中文']['newset'], 2)
+
   })
   it('unset', () => {
     var a = {

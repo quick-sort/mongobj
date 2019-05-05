@@ -1,7 +1,7 @@
 const ArrayFilter = /^\$\[(.*)\]$/;
 const ArrayIndex = /^[0-9]*$/;
 
-function getProp({ obj, path, arrayFilters, level = 0, createOnNone = false }) {
+function getProp({ obj, path, arrayFilters = [], level = 0, createOnNone = false }) {
   let tokens = path.split('.');
   let parent = obj;
   while (tokens.length > level) {
@@ -21,7 +21,7 @@ function getProp({ obj, path, arrayFilters, level = 0, createOnNone = false }) {
     } else {
       if (!(propName in parent)) {
         if (createOnNone !== false) {
-          parent[propName] = createOnNone;
+          parent[propName] = {}
           parent = parent[propName]
         }
       } else {
@@ -106,8 +106,15 @@ function update(obj, changes, options = {}) {
             obj,
             path: key,
             arrayFilters: options.arrayFilters,
-            createOnNone: []
+            level: 1,
+            createOnNone: true
           })
+          attr =  tokens[tokens.length - 1]
+          if (parent[attr] === undefined) {
+            parent[attr] = []
+
+          }
+          parent = parent[attr]
           if (patches[key]['$each']) {
             patches[key]['$each'].forEach(i => {
               if ('$position' in patches[key]) {
@@ -127,7 +134,7 @@ function update(obj, changes, options = {}) {
             path: key,
             arrayFilters: options.arrayFilters,
             level: 1,
-            createOnNone: {}
+            createOnNone: true
           })
           attr = tokens[tokens.length - 1];
           parent[attr] = patches[key];
