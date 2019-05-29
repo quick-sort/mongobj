@@ -1,7 +1,8 @@
 const ArrayFilter = /^\$\[(.*)\]$/;
 const ArrayIndex = /^[0-9]*$/;
 
-function getProp({ obj, path, arrayFilters = [], level = 0, createOnNone = false }) {
+function getProp(args = {}) {
+  let { obj, path, arrayFilters = [], level = 0, createOnNone = false } = args
   let tokens = path.split('.');
   let parent = obj;
   while (tokens.length > level) {

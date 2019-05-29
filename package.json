@@ -1,6 +1,6 @@
 {
   "name": "mongobj",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Object operations in mongo api style",
   "main": "index.js",
   "scripts": {
